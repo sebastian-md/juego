@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Cumpleaños: ¿A dónde vamos?</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #1a365d, #2d3748);
+      color: #fff;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      overflow-x: hidden;
+      transition: all 0.5s ease;
+    }
+    body.fail-mode {
+      background: linear-gradient(to right, #8B0000, #4B0000);
+      color: #ffcccc;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+    }
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 1em;
+      background-color: #ffffff22;
+      border: 1px solid #ffffff55;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:not(.disabled):not(.selected):not(.correct):not(.incorrect) {
+      background-color: #ffffff44;
+    }
+    button.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    button.selected {
+      background-color: #ffeb3b !important;
+      color: #3a7bd5;
+      font-weight: bold;
+      border: 2px solid #fff;
+    }
+    button.correct {
+      background-color: #4CAF50 !important;
+      color: white;
+      font-weight: bold;
+      border: 2px solid #fff;
+    }
+    button.incorrect {
+      background-color: #F44336 !important;
+      color: white;
+      font-weight: bold;
+      border: 2px solid #fff;
+    }
+    .lifelines {
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .lifelines button {
+      flex: 1 1 calc(50% - 10px);
+      margin: 5px;
+      background-color: #00000033;
+    }
+    #phone {
+      font-size: 2em;
+      display: none;
+      cursor: pointer;
+      text-align: center;
+    }
+    .progress {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 20px;
+    }
+    .progress span {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: #ffffff22;
+      color: #fff;
+      font-weight: bold;
+      opacity: 0.4;
+      transition: 0.3s;
+    }
+    .progress .current {
+      background-color: #fff;
+      color: #3a7bd5;
+      opacity: 1;
+    }
+    .progress .done {
+      background-color: #44ff99;
+      color: #004422;
+      opacity: 0.7;
+    }
+  @keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  50% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); }
+  100% { transform: translate(-50%, -50%) rotate(720deg) scale(1); }
+}
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.8); }
+  }
+  @keyframes sparkle {
+    0% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0); }
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideInUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  @keyframes yellowFlash {
+    0% { background-color: #ffeb3b; }
+    50% { background-color: #ffffff22; }
+    100% { background-color: #ffeb3b; }
+  }
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+    20%, 40%, 60%, 80% { transform: translateX(3px); }
+  }
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 235, 59, 0.5)); }
+    50% { filter: drop-shadow(0 0 8px rgba(255, 235, 59, 0.8)); }
+  }
+  @keyframes wave {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(20px); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes flagWave {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(2deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-2deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes slideInLeft {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideInRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes failPulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+  }
+  .presentation {
+    text-align: center;
+    padding: 20px;
+    position: relative;
+  }
+  .presentation h2 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    color: #ffeb3b;
+    text-shadow: 0 0 10px rgba(0,0,0,0.3);
+    animation: bounce 2s infinite;
+  }
+  .presentation p {
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+  .host-container {
+    display: flex;
+    align-items: center;
+    margin: 30px 0;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 20px;
+    animation: slideIn 1s ease;
+  }
+  .host-svg {
+    flex-shrink: 0;
+    margin-right: 20px;
+  }
+  .host-message {
+    text-align: left;
+    font-size: 1.1em;
+  }
+  .lifeline-explanation {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+  .lifeline-item {
+    width: 48%;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .lifeline-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lifeline-item h3 {
+    margin-top: 0;
+    color: #ffeb3b;
+    display: flex;
+    align-items: center;
+  }
+  .lifeline-item h3 span {
+    margin-right: 10px;
+    font-size: 1.5em;
+    display: inline-block;
+  }
+  .lifeline-icon-5050 {
+    animation: rotate 8s linear infinite;
+  }
+  .lifeline-icon-phone {
+    animation: shake 0.5s ease infinite;
+  }
+  .lifeline-icon-mago {
+    animation: glow 2s ease infinite;
+  }
+  .lifeline-icon-dice {
+    animation: pulse 1.5s ease infinite;
+  }
+  .start-button {
+    background-color: #ffeb3b;
+    color: #3a7bd5;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 30px;
+    padding: 15px;
+    border-radius: 8px;
+    animation: pulse 2s infinite;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s ease;
+  }
+  .start-button.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 235, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 235, 59, 0); }
+  }
+  .mago-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .mago-content {
+    text-align: center;
+    animation: fadeIn 1s ease;
+  }
+  .mago-message {
+    font-size: 1.8em;
+    margin-top: 30px;
+    color: #ffeb3b;
+    text-shadow: 0 0 10px rgba(255, 235, 59, 0.7);
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sparkle {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-color: #ffeb3b;
+    border-radius: 50%;
+    animation: sparkle 2s infinite;
+  }
+  .magic-wand {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background: linear-gradient(to right, #8e24aa, #ffeb3b);
+    transform-origin: left center;
+    animation: wandWave 3s infinite;
+  }
+  @keyframes wandWave {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+  }
+  .dice-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+  }
+  .dice {
+    width: 100px;
+    height: 100px;
+    background-color: white;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    font-weight: bold;
+    color: black;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    animation: spin 1s ease;
+  }
+  .dice-dot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: black;
+    border-radius: 50%;
+  }
+  .next-button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    opacity: 0.5;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  .next-button.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .next-button.active:hover {
+    background-color: #45a049;
+  }
+  .bribe-button {
+    background-color: #9C27B0;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    display: none;
+    animation: pulse 1s infinite;
+  }
+  .bribe-button:hover {
+    background-color: #7B1FA2;
+  }
+  .fail-message {
+    background-color: rgba(244, 67, 54, 0.2);
+    border-left: 4px solid #F44336;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    text-align: center;
+    font-size: 1.2em;
+    color: #ffcccc;
+    animation: failPulse 2s infinite;
+    display: none;
+  }
+  .fail-message h4 {
+    color: #ff9999;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  .floating-element {
+    position: absolute;
+    opacity: 0.7;
+    z-index: -1;
+  }
+  .star {
+    width: 20px;
+    height: 20px;
+    background-color: #ffeb3b;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: float 4s ease-in-out infinite;
+  }
+  .confetti {
+    width: 10px;
+    height: 10px;
+    background-color: #ffeb3b;
+    animation: float 3s ease-in-out infinite;
+  }
+  .final-screen {
+    text-align: center;
+    padding: 20px;
+    display: none;
+    animation: fadeIn 1s ease;
+  }
+  .final-screen h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #ffeb3b;
+    text-shadow: 0 0 10px rgba(0,0,0,0.3);
+    animation: bounce 2s infinite;
+  }
+  .destination-name {
+    font-size: 4em;
+    font-weight: bold;
+    margin: 30px 0;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255,255,255,0.5);
+    animation: pulse 2s infinite;
+  }
+  .flag-container {
+    margin: 30px auto;
+    width: 200px;
+    height: 150px;
+    animation: flagWave 3s ease infinite;
+  }
+  .denmark-image {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 10px;
+    margin: 20px auto;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    animation: float 4s ease-in-out infinite;
+  }
+  .final-message {
+    font-size: 1.5em;
+    margin: 20px 0;
+    color: #ffeb3b;
+    animation: wave 3s ease infinite;
+  }
+  .info-section {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+    animation: slideInUp 1s ease;
+  }
+  .info-section h3 {
+    color: #ffeb3b;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+  }
+  .info-section ul {
+    padding-left: 20px;
+  }
+  .info-section li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .places-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  .place-card {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease;
+    animation: fadeIn 1.5s ease;
+  }
+  .place-card:hover {
+    transform: translateY(-5px);
+    background-color: rgba(255,255,255,0.2);
+  }
+  .place-card h4 {
+    color: #ffeb3b;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  .place-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .fun-fact {
+    background-color: rgba(255,235,59,0.2);
+    border-left: 4px solid #ffeb3b;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    animation: slideInLeft 1.5s ease;
+  }
+  .fun-fact h4 {
+    color: #ffeb3b;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 2s ease;
+  }
+  
+  .start-content {
+    text-align: center;
+    animation: slideInUp 1.5s ease;
+  }
+  
+  .mystery-title {
+    font-size: 4em;
+    margin-bottom: 30px;
+    color: #ffeb3b;
+    text-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
+    animation: pulse 2s infinite;
+  }
+  
+  .mystery-text {
+    font-size: 1.5em;
+    margin-bottom: 40px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    animation: fadeIn 3s ease;
+  }
+  
+  .mystery-button {
+    background: linear-gradient(45deg, #ffeb3b, #ffc107);
+    color: #1a1a2e;
+    font-size: 1.3em;
+    font-weight: bold;
+    padding: 20px 40px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(255, 235, 59, 0.6);
+    animation: heartbeat 1.5s ease-in-out infinite;
+    transition: all 0.3s ease;
+  }
+  
+  .mystery-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(255, 235, 59, 0.8);
+  }
+  
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+  }
+  
+  .typing-text {
+    overflow: hidden;
+    border-right: 2px solid #ffeb3b;
+    margin: 0;
+    animation: blink 0.75s step-end infinite;
+    word-wrap: break-word;
+    line-height: 1.5;
+  }
+  
+  @keyframes blink {
+    from, to { border-color: transparent }
+    50% { border-color: #ffeb3b; }
+  }
+  
+  .hint-container {
+    background: linear-gradient(135deg, rgba(255, 235, 59, 0.1), rgba(255, 193, 7, 0.1));
+    border: 2px solid #ffeb3b;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+    box-shadow: 0 0 20px rgba(255, 235, 59, 0.3);
+  }
+  
+  .hint-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .hint-title {
+    color: #ffeb3b;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+  }
+  
+  .hint-text {
+    font-size: 1.1em;
+    line-height: 1.5;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+<div id="startScreen" class="start-screen">
+  <div class="start-content">
+    <h1 class="mystery-title">🎁</h1>
+    <p class="mystery-text">Un viaje misterioso te espera...</p>
+    <button class="mystery-button" id="mysteryBtn" onclick="showPresentation()">EMPEZAR</button>
+  </div>
+</div>
+
+<div id="presentation" class="presentation" style="display: none;">
+  <!-- Elementos decorativos SVG animados -->
+  <div class="floating-element star" style="top: 10%; left: 5%; animation-delay: 0s;"></div>
+  <div class="floating-element star" style="top: 15%; right: 8%; animation-delay: 0.5s;"></div>
+  <div class="floating-element confetti" style="top: 30%; left: 10%; animation-delay: 1s; background-color: #4CAF50;"></div>
+  <div class="floating-element confetti" style="top: 40%; right: 15%; animation-delay: 1.5s; background-color: #F44336;"></div>
+  <div class="floating-element confetti" style="top: 60%; left: 7%; animation-delay: 2s; background-color: #2196F3;"></div>
+  <div class="floating-element star" style="top: 70%; right: 5%; animation-delay: 2.5s;"></div>
+  
+  <h2>¡Bienvenida al Aventura Quiz!</h2>
+  
+  <div class="host-container">
+    <div class="host-svg">
+      <svg width="120" height="120" viewBox="0 0 120 120">
+        <!-- Cuerpo del presentador -->
+        <rect x="45" y="70" width="30" height="40" fill="#4a148c" rx="5"/>
+        
+        <!-- Cabeza -->
+        <circle cx="60" cy="50" r="20" fill="#ffccbc"/>
+        
+        <!-- Sombrero de presentador -->
+        <path d="M40,35 L60,15 L80,35 Z" fill="#311b92"/>
+        <rect x="35" y="32" width="50" height="10" fill="#311b92"/>
+        
+        <!-- Ojos -->
+        <circle cx="52" cy="48" r="2" fill="#000"/>
+        <circle cx="68" cy="48" r="2" fill="#000"/>
+        
+        <!-- Boca sonriente -->
+        <path d="M52,55 Q60,62 68,55" fill="none" stroke="#000" stroke-width="1.5"/>
+        
+        <!-- Micrófono -->
+        <circle cx="85" cy="70" r="8" fill="#9e9e9e"/>
+        <rect x="85" y="70" width="4" height="20" fill="#616161"/>
+        
+        <!-- Animación de brazo -->
+        <line x1="60" y1="70" x2="85" y2="70" stroke="#ffccbc" stroke-width="4" stroke-linecap="round">
+          <animate attributeName="x2" values="85;75;85" dur="2s" repeatCount="indefinite"/>
+        </line>
+      </svg>
+    </div>
+    
+    <div class="host-message">
+      <p id="message1" class="typing-text"></p>
+      <p id="message2" class="typing-text"></p>
+      <p id="message3" class="typing-text"></p>
+    </div>
+  </div>
+  
+  <h3 style="color: #ffeb3b; margin-top: 25px;">Tus Comodines Especiales:</h3>
+  
+  <div class="lifeline-explanation">
+    <div class="lifeline-item" id="lifeline1">
+      <h3>
+        <span class="lifeline-icon-5050">🌐</span>
+        50-50
+      </h3>
+      <p>Elimina dos respuestas incorrectas, dejando solo la correcta y otra incorrecta.</p>
+    </div>
+    
+    <div class="lifeline-item" id="lifeline2">
+      <h3>
+        <span class="lifeline-icon-phone">📞</span>
+        Llamada
+      </h3>
+      <p>Permite que llames a alguien para pedir ayuda con la respuesta.</p>
+    </div>
+    
+    <div class="lifeline-item" id="lifeline3">
+      <h3>
+        <span class="lifeline-icon-mago">🔮</span>
+        Mago
+      </h3>
+      <p>Cambia la pregunta actual por una completamente diferente.</p>
+    </div>
+    
+    <div class="lifeline-item" id="lifeline4">
+      <h3>
+        <span class="lifeline-icon-dice">🎲</span>
+        Azar
+      </h3>
+      <p>Elimina entre 1 y 3 respuestas incorrectas al azar (depende de tu suerte).</p>
+    </div>
+  </div>
+  
+  <p id="reminder" style="margin-top: 20px; font-style: italic; opacity: 0;">Recuerda: Cada comodín solo se puede usar una vez durante todo el juego. ¡Úsalos sabiamente!</p>
+  
+  <button class="start-button" id="startBtn" onclick="startGame()">¡Comenzar Aventura! 🚀</button>
+</div>
+
+  <div id="gameContainer" style="display: none;">
+  <h1 style="font-size: 1.2em; text-align: center; margin-bottom: 30px;">🎁 Quiz de Cumpleaños: ¿A dónde vamos? 🚀</h1>
+  <div id="quiz"></div>
+  <div class="hint-container" id="hintContainer" style="display: none;">
+    <div class="hint-title">💡 Pista del Destino</div>
+    <div class="hint-text" id="hintText"></div>
+  </div>
+  <div class="fail-message" id="failMessage">
+    <h4>❌ ¡Has fallado la pregunta!</h4>
+    <p>Se admite soborno argentino. Es la única posibilidad de avanzar en el juego.</p>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="lifelines">
+    <button id="c5050">🌐 50‑50</button>
+    <button id="cphone">📞 Llamada</button>
+    <button id="cmago">🔮 Mago</button>
+    <button id="crandom">🎲 Azar</button>
+    <button class="bribe-button" id="bribeBtn" onclick="useBribe()">Soborno 5€</button>
+  </div>
+  <div id="phone">📞 Llama a alguien para ayudarte 😉</div>
+  <button class="next-button" id="nextBtn" onclick="nextQuestion()">Siguiente Pregunta</button>
+</div>
+
+<div id="finalScreen" class="final-screen">
+  <h1>🎁 Quiz de Cumpleaños: ¿A dónde vamos? 🚀</h1>
+  <h2>🎁 ¡Sorpresa descubierta! ¡Prepárate para el viaje! ✈️</h2>
+  
+  <div class="destination-name">DINAMARCA</div>
+  
+  <div class="flag-container">
+    <svg width="200" height="150" viewBox="0 0 200 150">
+      <!-- Bandera de Dinamarca -->
+      <rect width="200" height="150" fill="#C60C30"/>
+      <rect x="0" y="60" width="200" height="30" fill="white"/>
+      <rect x="85" y="0" width="30" height="150" fill="white"/>
+    </svg>
+  </div>
+  
+  <img class="denmark-image" src="https://www.shutterstock.com/image-photo/beautiful-summer-scenery-captivating-view-600nw-1875875356.jpg" alt="Paisaje de Dinamarca">
+  
+  <div class="final-message">¡Nos vamos a Dinamarca! 🇩🇰</div>
+  
+  <div class="info-section">
+    <h3>🌟 Datos curiosos sobre Dinamarca</h3>
+    <ul>
+      <li>Dinamarca es el país más feliz del mundo según el Informe Mundial de la Felicidad.</li>
+      <li>Los daneses son famosos por su concepto "Hygge", que significa crear una atmósfera acogedora y agradable.</li>
+      <li>Copenhague, la capital, tiene más bicicletas que coches.</li>
+      <li>LEGO, uno de los juguetes más famosos del mundo, fue inventado en Dinamarca.</li>
+      <li>El Puente de Øresund conecta Dinamarca con Suecia y es una maravilla de la ingeniería.</li>
+    </ul>
+  </div>
+  
+  <div class="fun-fact">
+    <h4>💡 Sabías que...</h4>
+    <p>En Dinamarca, cuando alguien cumple 25 años y está soltero, sus amigos le tiran canela por todo el cuerpo. ¡Una tradición muy peculiar!</p>
+  </div>
+  
+  <h3 style="color: #ffeb3b; margin-top: 30px;">🏰 Lugares que no puedes perderte</h3>
+  
+  <div class="places-grid">
+    <div class="place-card">
+      <img src="https://media.istockphoto.com/id/587892190/es/foto/copenhague-dinamarca-en-el-canal-de-nyhavn.jpg?s=612x612&w=0&k=20&c=yQf6aJjrxaKKYqSVt2tNYInWU6_UF8XgTAA1YCBmkXY=" alt="Copenhague">
+      <h4>Copenhague</h4>
+      <p>La capital danesa, famosa por sus canales, el colorido barrio de Nyhavn y la estatua de la Sirenita.</p>
+    </div>
+    
+    <div class="place-card">
+      <img src="https://www.civitatis.com/f/dinamarca/copenhague/big/castillo-kronborg-lund-malmo.jpg" alt="Castillo de Kronborg">
+      <h4>Castillo de Kronborg</h4>
+      <p>El castillo de Hamlet, declarado Patrimonio de la Humanidad por la UNESCO.</p>
+    </div>
+    
+    <div class="place-card">
+      <img src="https://media.traveler.es/photos/67989b6f07fe7addf36cefba/16:9/w_1920,c_limit/1947111071" alt="Aarhus">
+      <h4>Aarhus</h4>
+      <p>La segunda ciudad más grande, con su fascinante museo al aire libre Den Gamle By.</p>
+    </div>
+    
+    <div class="place-card">
+      <img src="https://www.planetware.com/wpimages/2020/03/denmark-in-pictures-beautiful-places-to-photograph-sorvagsvatn-lake-faroe-islands.jpg" alt="Faros de Skagen">
+      <h4>Skagen</h4>
+      <p>El punto más al norte de Dinamarca, donde el Mar del Norte y el Mar Báltico se encuentran.</p>
+    </div>
+  </div>
+  
+  <div class="info-section">
+    <h3>🍽️ Gastronomía Danesa</h3>
+    <ul>
+      <li><strong>Smørrebrød:</strong> Rebanadas de pan de centeno cubiertas con diversos ingredientes.</li>
+      <li><strong>Pastel danés:</strong> Aunque se llama "danés" en muchos países, en Dinamarca se conoce como "wienerbrød".</li>
+      <li><strong>Aquavit:</strong> Bebida alcohólica destilada con sabor a eneldo y otras hierbas.</li>
+      <li><strong>Frikadeller:</strong> Albóndigas danesas, un plato tradicional en todas las casas.</li>
+    </ul>
+  </div>
+  
+  <!-- Elementos decorativos SVG animados -->
+  <div class="floating-element star" style="top: 10%; left: 5%; animation-delay: 0s;"></div>
+  <div class="floating-element star" style="top: 15%; right: 8%; animation-delay: 0.5s;"></div>
+  <div class="floating-element confetti" style="top: 30%; left: 10%; animation-delay: 1s; background-color: #C60C30;"></div>
+  <div class="floating-element confetti" style="top: 40%; right: 15%; animation-delay: 1.5s; background-color: white;"></div>
+  <div class="floating-element confetti" style="top: 60%; left: 7%; animation-delay: 2s; background-color: #C60C30;"></div>
+  <div class="floating-element star" style="top: 70%; right: 5%; animation-delay: 2.5s;"></div>
+</div>
+
+<div id="magoContainer" class="mago-container">
+  <div class="mago-content">
+    <div style="position: relative;">
+      <svg width="350" height="350" viewBox="0 0 350 350">
+        <!-- Cuerpo del mago -->
+        <rect x="150" y="200" width="50" height="100" fill="#4a148c" rx="5"/>
+        
+        <!-- Cabeza -->
+        <circle cx="175" cy="160" r="35" fill="#ffccbc"/>
+        
+        <!-- Sombrero de mago -->
+        <path d="M140,130 L175,70 L210,130 Z" fill="#311b92"/>
+        <rect x="130" y="125" width="90" height="15" fill="#311b92"/>
+        
+        <!-- Ojos -->
+        <circle cx="160" cy="155" r="3" fill="#000"/>
+        <circle cx="190" cy="155" r="3" fill="#000"/>
+        
+        <!-- Barba -->
+        <path d="M145,175 Q175,195 205,175" fill="none" stroke="#fff" stroke-width="3"/>
+        
+        <!-- Varita mágica -->
+        <line x1="200" y1="180" x2="260" y2="130" stroke="#ffeb3b" stroke-width="5"/>
+        <circle cx="260" cy="130" r="12" fill="#ff5722"/>
+        
+        <!-- Efectos mágicos -->
+        <circle cx="275" cy="115" r="8" fill="#ffeb3b" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;0.2;0.7" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="290" cy="100" r="6" fill="#ffeb3b" opacity="0.5">
+          <animate attributeName="opacity" values="0.5;0.1;0.5" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="280" cy="145" r="10" fill="#ffeb3b" opacity="0.6">
+          <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        
+        <!-- Texto en el sombrero -->
+        <text x="175" y="115" font-size="16" text-anchor="middle" fill="#ffeb3b" font-weight="bold">ERIC</text>
+      </svg>
+      
+      <div class="magic-wand" style="top: 180px; left: 260px;"></div>
+    </div>
+    
+    <div class="mago-message">Martinga, me has invocado, soy el Mago Eric y te cambiaré la pregunta</div>
+  </div>
+</div>
+
+<script>
+const preguntasOriginales = [
+  {q: "¿En qué galaxia se encuentra la Tierra?", opts:["Andrómeda","Galaxia del Triángulo","Morón","Vía Láctea"], ans:"Vía Láctea", pista:"Aún estamos lejos, pero es un comienzo universal 🌌"},
+  {q: "¿Qué estilo musical suele acompañar las películas de fantasía?", opts:["Música folk con cuerdas","Jazz latino","Heavy Metal","Trap"], ans:"Música folk con cuerdas", pista:"Melodías que parecen sacadas de bosques encantados 🎻"},
+  {q: "¿Qué medio de transporte supera en número a los coches en ciertas ciudades del norte de Europa?", opts:["Tranvía","Patinete eléctrico","Bicicleta","Burro"], ans:"Bicicleta", pista:"Vamos a pedalear más que conducir 🚲"},
+  {q: "¿Qué característica destaca en los machos del ciervo rojo?", opts:["Plumas coloridas","Cuernos ramificados","Pico largo","Rayas en la piel"], ans:"Cuernos ramificados", pista:"Los ciervos rojos, majestuosos y silenciosos, dominan algunos de los paisajes que vas a visitar 🦌"},
+  {q: "¿De qué país es capital Sarajevo?", opts:["Macedonia","Kosovo","Bosnia","Moldavia"], ans:"Bosnia", pista:"Bonita ciudad, pero no hagas la maleta todavía... ¡ese no es tu destino! 😜"},
+  {q: "¿Cuál de estas palabras representa una filosofía de bienestar?", opts:["Karma","BBVA","Hygge","Ubuntu"], ans:"Hygge", pista:"Allí la felicidad se mide en silencio y paz"},
+  {q: "¿Cuál es el uso horario del centro de Europa (CET)?", opts:["UTC+1(invierno) y UTC+2(verano)","UTC+3(invierno) y UTC+4(verano)","UTC-1","UTC"], ans:"UTC+1(invierno) y UTC+2(verano)", pista:"La hora cambia... pero no tanto. Algo cerca y distinto."},
+  {q: "¿Qué fue Pangea?", opts:["Una civilización","Un planeta","Una era glaciar","La unión de los continentes"], ans:"La unión de los continentes", pista:"Todo estaba unido… igual que lo que visitarás estuvo alguna vez unido con más tierras."},
+  {q: "¿En que ciudad no ha estado nunca Maria?", opts:["Belogorsk","Odessa","Moscu","Kyev"], ans:"Belogorsk", pista:"Belogorsk y tu destino comparten agricultura como parte importante de la economía local"},
+  {q: "¿Qué bebida caliente es común acompañada de canela o cardamomo?", opts:["Té negro","Café especiado","Mate","Zumo de mango y chocolate con ropa vieja y ketchup light"], ans:"Café especiado", pista:"Perfecto para el lugar al que vamos ☕️"},
+  {q: "¿Qué cadena montañosa atraviesa parte de Macedonia?", opts:["Alpes","Balcánicos","Cárpatos","Pirineos"], ans:"Balcánicos", pista:"Cordilleras imponentes, pero las nuestras serán más suaves y verdes 🌄"},
+  {q: "¿Qué ocurre en algunos países europeos cuando alguien cumple 25 años y está soltero?", opts:["Le hacen un examen","Le tiran canela","Le regalan un reloj","Le cortan el pelo"], ans:"Le tiran canela", pista:"¡Uy! ¿Te suena de algo? Empezamos a acercarnos… 🎯"},
+  {q: "¿Qué dinosaurio era herbívoro y tenía un cuello largo?", opts:["Tyrannosaurus Rex","Triceratops","Velociraptor","Brachiosaurus"], ans:"Brachiosaurus", pista:"Hace millones de años, criaturas como esta pisaron las tierras que ahora exploraremos."},
+  {q: "¿Qué famosa compañía de juguetes cambió su producción de madera a plástico después de la Segunda Guerra Mundial?", opts:["Playmobil","LEGO","Mattel","Hasbro"], ans:"LEGO", pista:"Donde vamos… los bloques no son solo de arquitectura. LEGO se fundó en este país en 1932 y se dedicaba originalmente a la fabricación de juguetes de madera.🧱"},
+  {q: "¿Cuál de estos países forma parte de la península de Jutlandia?", opts:["Lituania","Dinamarca","Suecia","Letonia"], ans:"Dinamarca", pista:"La respuesta final está más cerca de lo que imaginas... 🇩🇰"}
+];
+let preguntas = [...preguntasOriginales];
+let idx = 0;
+let score = 0;
+const used = {c5050:false, cphone:false, cmago:false, crandom:false};
+const total = preguntas.length;
+let selectedAnswer = null; // Almacena la respuesta seleccionada
+let isProcessing = false; // Evita múltiples clics durante la animación
+let isAnswered = false; // Indica si la pregunta ha sido respondida correctamente
+let currentBribe = 5; // Cantidad actual del soborno
+let hasFailed = false; // Indica si el usuario ha fallado la pregunta actual
+let hintTimeout = null; // Timeout para mostrar la pista
+
+// Animación de presentación
+function animatePresentation() {
+  // Textos para la animación de escritura
+  const messages = [
+    "¡Hola Puchi! Bienvenida a este juego especial para ti. 🎁",
+    "Es un viaje de 15 preguntas que te llevarán a descubrir un destino sorpresa. A medida que avances, las pistas se volverán más claras hasta que finalmente reveles nuestro próximo destino.",
+    "¡Y no te preocupes! Tienes 4 comodines especiales que te ayudarán en el camino. ¡Vamos a conocerlos!"
+  ];
+  
+  // Función para escribir texto
+  function typeWriter(element, text, speed = 50) {
+    let i = 0;
+    element.textContent = '';
+    
+    function type() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        // Quitar el cursor parpadeante cuando termine
+        element.style.borderRight = 'none';
+      }
+    }
+    type();
+  }
+  
+  // Iniciar animación de escritura para cada mensaje
+  setTimeout(() => {
+    typeWriter(document.getElementById('message1'), messages[0], 40);
+  }, 500);
+  
+  setTimeout(() => {
+    typeWriter(document.getElementById('message2'), messages[1], 35);
+  }, 4000);
+  
+  // Calcular cuándo termina el segundo mensaje: 4000ms + (longitud del texto * 35ms) + 500ms de margen
+  const secondMessageLength = messages[1].length;
+  const secondMessageDuration = secondMessageLength * 35;
+  const thirdMessageStart = 4000 + secondMessageDuration + 500;
+  
+  setTimeout(() => {
+    typeWriter(document.getElementById('message3'), messages[2], 40);
+  }, thirdMessageStart);
+  
+  // Calcular cuándo termina el tercer mensaje
+  const thirdMessageLength = messages[2].length;
+  const thirdMessageDuration = thirdMessageLength * 40;
+  const comodinesStart = thirdMessageStart + thirdMessageDuration + 1000;
+  
+  // Mostrar comodines uno por uno
+  setTimeout(() => {
+    document.getElementById('lifeline1').classList.add('visible');
+    document.getElementById('lifeline1').style.animation = 'slideInLeft 0.5s ease';
+  }, comodinesStart);
+  
+  setTimeout(() => {
+    document.getElementById('lifeline2').classList.add('visible');
+    document.getElementById('lifeline2').style.animation = 'slideInRight 0.5s ease';
+  }, comodinesStart + 500);
+  
+  setTimeout(() => {
+    document.getElementById('lifeline3').classList.add('visible');
+    document.getElementById('lifeline3').style.animation = 'slideInLeft 0.5s ease';
+  }, comodinesStart + 1000);
+  
+  setTimeout(() => {
+    document.getElementById('lifeline4').classList.add('visible');
+    document.getElementById('lifeline4').style.animation = 'slideInRight 0.5s ease';
+  }, comodinesStart + 1500);
+  
+  // Mostrar recordatorio
+  setTimeout(() => {
+    document.getElementById('reminder').style.opacity = '1';
+    document.getElementById('reminder').style.transition = 'opacity 1s ease';
+    document.getElementById('reminder').style.animation = 'slideInUp 0.5s ease';
+  }, comodinesStart + 2000);
+  
+  // Mostrar botón de inicio
+  setTimeout(() => {
+    document.getElementById('startBtn').classList.add('visible');
+    document.getElementById('startBtn').style.animation = 'bounce 0.5s ease';
+  }, comodinesStart + 2500);
+}
+
+// Iniciar animación cuando la página cargue
+window.onload = function() {
+  // La pantalla de inicio ya está visible por defecto
+  // No necesitamos hacer nada aquí
+};
+
+function showPresentation() {
+  // Ocultar pantalla de inicio con animación
+  const startScreen = document.getElementById('startScreen');
+  startScreen.style.animation = 'fadeOut 1s ease';
+  
+  setTimeout(() => {
+    startScreen.style.display = 'none';
+    // Mostrar pantalla de presentación
+    document.getElementById('presentation').style.display = 'block';
+    // Iniciar animación de presentación
+    animatePresentation();
+  }, 1000);
+}
+
+function startGame() {
+  document.getElementById('presentation').style.display = 'none';
+  document.getElementById('gameContainer').style.display = 'block';
+  render();
+}
+
+function render() {
+  const p = preguntas[idx];
+  const quiz = document.getElementById('quiz');
+  
+  // Cancelar timeout de pista anterior si existe
+  if (hintTimeout) {
+    clearTimeout(hintTimeout);
+    hintTimeout = null;
+  }
+  
+  // Ocultar pista anterior
+  const hintContainer = document.getElementById('hintContainer');
+  hintContainer.style.display = 'none';
+  hintContainer.classList.remove('visible');
+  
+  // Crear la pregunta con animación
+  const questionDiv = document.createElement('div');
+  questionDiv.className = 'question';
+  questionDiv.style.textAlign = 'center';
+  questionDiv.style.fontSize = '1.3em';
+  questionDiv.style.marginBottom = '30px';
+  questionDiv.style.opacity = '0';
+  questionDiv.style.transform = 'scale(0.8)';
+  questionDiv.style.transition = 'all 1s ease';
+  questionDiv.innerHTML = `<strong>Pregunta ${idx+1}:</strong> ${p.q}`;
+  
+  quiz.innerHTML = '';
+  quiz.appendChild(questionDiv);
+  
+  // Animar la aparición de la pregunta
+  setTimeout(() => {
+    questionDiv.style.opacity = '1';
+    questionDiv.style.transform = 'scale(1)';
+  }, 500);
+  
+  // Limpiar selección anterior
+  selectedAnswer = null;
+  isAnswered = false;
+  hasFailed = false;
+  
+  // Desactivar botón de siguiente pregunta
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.remove('active');
+  
+  // Ocultar botón de soborno y mensaje de fallo
+  const bribeBtn = document.getElementById('bribeBtn');
+  bribeBtn.style.display = 'none';
+  const failMessage = document.getElementById('failMessage');
+  failMessage.style.display = 'none';
+  
+  // Actualizar texto del botón de soborno
+  bribeBtn.textContent = `Soborno ${currentBribe}€`;
+  
+  // Habilitar todos los botones de comodines
+  enableAllLifelines();
+  
+  // Restaurar estilo normal si estaba en modo fallo
+  document.body.classList.remove('fail-mode');
+  
+  // Crear las opciones pero ocultarlas inicialmente
+  const options = [];
+  p.opts.forEach((o, index) => {
+    const btn = document.createElement('button');
+    btn.textContent = o;
+    btn.onclick = () => answer(btn, o);
+    btn.style.opacity = '0';
+    btn.style.transform = 'translateY(20px)';
+    btn.style.transition = 'all 0.5s ease';
+    quiz.appendChild(btn);
+    options.push(btn);
+  });
+  
+  // Animar la aparición de las opciones una por una (después de que aparezca la pregunta)
+  options.forEach((btn, index) => {
+    setTimeout(() => {
+      btn.style.opacity = '1';
+      btn.style.transform = 'translateY(0)';
+    }, 5500 + (index * 3000)); // 5.5 segundos después de la pregunta + 3 segundos entre cada opción
+  });
+  
+  document.getElementById('phone').style.display = 'none';
+  updateProgress();
+}
+
+function answer(button, opt) {
+  // Si estamos procesando una respuesta o ya se ha respondido correctamente, no hacer nada
+  if (isProcessing || isAnswered) return;
+  
+  const p = preguntas[idx];
+  
+  // Si no hay respuesta seleccionada
+  if (!selectedAnswer) {
+    // Marcar la respuesta como seleccionada
+    button.classList.add('selected');
+    selectedAnswer = { button, opt };
+    return;
+  }
+  
+  // Si se vuelve a hacer clic en la misma respuesta
+  if (selectedAnswer.button === button) {
+    isProcessing = true;
+    
+    // Quitar la clase selected temporalmente para la animación
+    button.classList.remove('selected');
+    
+    // Hacer parpadeo entre amarillo y el color original
+    button.style.animation = 'yellowFlash 0.5s ease 3';
+    
+    setTimeout(() => {
+      button.style.animation = '';
+      
+      if (opt === p.ans) {
+        // Respuesta correcta - cambiar a verde
+        button.classList.add('correct');
+        isAnswered = true;
+        
+        // Mostrar pista después de 5 segundos
+        hintTimeout = setTimeout(() => {
+          showHint(p.pista);
+        }, 5000);
+        
+        // Si es la última pregunta (índice 14), mostrar pantalla final directamente
+        if (idx === total - 1) {
+          setTimeout(() => {
+            showFinalScreen();
+          }, 1500);
+        } else {
+          // Activar botón de siguiente pregunta
+          const nextBtn = document.getElementById('nextBtn');
+          nextBtn.classList.add('active');
+        }
+      } else {
+        // Respuesta incorrecta - cambiar a rojo
+        button.classList.add('incorrect');
+        hasFailed = true;
+        
+        // Deshabilitar todos los botones de comodines
+        disableAllLifelines();
+        
+        // Mostrar mensaje de fallo después de un breve retraso
+        setTimeout(() => {
+          activateFailMode();
+        }, 1000);
+      }
+      
+      isProcessing = false;
+    }, 1500);
+  } else {
+    // Si se selecciona una respuesta diferente
+    // Desmarcar la respuesta anterior
+    selectedAnswer.button.classList.remove('selected');
+    
+    // Marcar la nueva respuesta
+    button.classList.add('selected');
+    selectedAnswer = { button, opt };
+  }
+}
+
+function nextQuestion() {
+  if (!isAnswered) return;
+  
+  // Cancelar timeout de pista si existe
+  if (hintTimeout) {
+    clearTimeout(hintTimeout);
+    hintTimeout = null;
+  }
+  
+  // Ocultar pista antes de cambiar de pregunta
+  const hintContainer = document.getElementById('hintContainer');
+  hintContainer.style.display = 'none';
+  hintContainer.classList.remove('visible');
+  
+  idx++;
+  if (idx < preguntas.length) {
+    render();
+  } else {
+    showFinalScreen();
+  }
+}
+
+function useBribe() {
+  // Cancelar timeout de pista si existe
+  if (hintTimeout) {
+    clearTimeout(hintTimeout);
+    hintTimeout = null;
+  }
+  
+  // Ocultar pista antes de usar el soborno
+  const hintContainer = document.getElementById('hintContainer');
+  hintContainer.style.display = 'none';
+  hintContainer.classList.remove('visible');
+  
+  // Al usar el soborno, simplemente pasamos a la siguiente pregunta
+  // El monto del soborno se duplica cuando el usuario falla, no cuando lo usa
+  nextQuestion();
+}
+
+function activateFailMode() {
+  // Cambiar el estilo de la página a tonos oscuros y rojos
+  document.body.classList.add('fail-mode');
+  
+  // Mostrar mensaje de fallo
+  const failMessage = document.getElementById('failMessage');
+  failMessage.style.display = 'block';
+  
+  // Mostrar botón de soborno con el valor actual
+  const bribeBtn = document.getElementById('bribeBtn');
+  bribeBtn.style.display = 'block';
+  bribeBtn.textContent = `Soborno ${currentBribe}€`;
+  
+  // Duplicar el monto del soborno para la próxima vez que falle
+  currentBribe *= 2;
+  
+  // Deshabilitar el botón de siguiente pregunta
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.remove('active');
+}
+
+function deactivateFailMode() {
+  // Restaurar el estilo normal
+  document.body.classList.remove('fail-mode');
+  
+  // Ocultar mensaje de fallo
+  const failMessage = document.getElementById('failMessage');
+  failMessage.style.display = 'none';
+  
+  // Ocultar botón de soborno
+  const bribeBtn = document.getElementById('bribeBtn');
+  bribeBtn.style.display = 'none';
+}
+
+function disableAllLifelines() {
+  // Deshabilitar todos los botones de comodines
+  document.getElementById('c5050').classList.add('disabled');
+  document.getElementById('c5050').disabled = true;
+  document.getElementById('cphone').classList.add('disabled');
+  document.getElementById('cphone').disabled = true;
+  document.getElementById('cmago').classList.add('disabled');
+  document.getElementById('cmago').disabled = true;
+  document.getElementById('crandom').classList.add('disabled');
+  document.getElementById('crandom').disabled = true;
+}
+
+function enableAllLifelines() {
+  // Habilitar solo los botones de comodines que no se han usado
+  if (!used.c5050) {
+    document.getElementById('c5050').classList.remove('disabled');
+    document.getElementById('c5050').disabled = false;
+  }
+  if (!used.cphone) {
+    document.getElementById('cphone').classList.remove('disabled');
+    document.getElementById('cphone').disabled = false;
+  }
+  if (!used.cmago) {
+    document.getElementById('cmago').classList.remove('disabled');
+    document.getElementById('cmago').disabled = false;
+  }
+  if (!used.crandom) {
+    document.getElementById('crandom').classList.remove('disabled');
+    document.getElementById('crandom').disabled = false;
+  }
+}
+
+function showFinalScreen() {
+  document.getElementById('gameContainer').style.display = 'none';
+  document.getElementById('finalScreen').style.display = 'block';
+}
+
+function updateProgress(final = false) {
+  const progress = document.getElementById('progress');
+  progress.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const el = document.createElement('span');
+    el.textContent = i+1;
+    if (i < idx) el.classList.add('done');
+    else if (i === idx && !final) el.classList.add('current');
+    progress.appendChild(el);
+  }
+}
+function disableButton(id) {
+  document.getElementById(id).classList.add('disabled');
+  document.getElementById(id).disabled = true;
+}
+function shuffle(arr) {
+  return arr.sort(()=>Math.random()-0.5);
+}
+// Comodines
+document.getElementById('c5050').onclick = ()=>{
+  if (used.c5050) return;
+  used.c5050 = true;
+  const p = preguntas[idx];
+  let wrong = p.opts.filter(o=>o !== p.ans);
+  wrong = shuffle(wrong).slice(0,2);
+  
+  // Buscar todos los botones de respuesta
+  const quizButtons = document.querySelectorAll('#quiz button');
+  quizButtons.forEach(b => {
+    if (wrong.includes(b.textContent)) {
+      b.classList.add('disabled');
+      b.style.opacity = '0.3';
+      b.style.pointerEvents = 'none';
+    }
+  });
+  
+  disableButton('c5050');
+};
+document.getElementById('cphone').onclick = ()=>{
+  if (used.cphone) return;
+  used.cphone = true;
+  document.getElementById('phone').style.display = 'block';
+  disableButton('cphone');
+};
+document.getElementById('cmago').onclick = ()=>{
+  if (used.cmago) return;
+  used.cmago = true;
+  disableButton('cmago');
+  
+  // Mostrar animación del mago
+  const magoContainer = document.getElementById('magoContainer');
+  magoContainer.style.display = 'flex';
+  
+  // Crear partículas mágicas
+  for (let i = 0; i < 30; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    sparkle.style.left = `${Math.random() * 100}%`;
+    sparkle.style.top = `${Math.random() * 100}%`;
+    sparkle.style.animationDelay = `${Math.random() * 2}s`;
+    magoContainer.appendChild(sparkle);
+  }
+  
+  // Después de 5 segundos, ocultar la animación y cambiar la pregunta
+  setTimeout(() => {
+    magoContainer.style.animation = 'fadeOut 1s ease';
+    
+    setTimeout(() => {
+      magoContainer.style.display = 'none';
+      magoContainer.style.animation = '';
+      
+      // Limpiar partículas
+      const sparkles = magoContainer.querySelectorAll('.sparkle');
+      sparkles.forEach(sparkle => sparkle.remove());
+      
+      // Reemplazar la pregunta actual por una especial del mago
+      preguntas.splice(idx, 1, {
+        q: "¿Qué actividad es más típica en países nublados?",
+        opts: ["Hacer surf", "Comer al aire libre", "Leer junto a una vela", "Dormir en una hamaca"],
+        ans: "Leer junto a una vela",
+        pista: "Aquí el clima invita a manta, libros y chocolate caliente 📖🕯️"
+      });
+      
+      alert("🔮 ¡El mago ha intervenido! Tu pregunta ha cambiado misteriosamente...");
+      render();
+    }, 1000);
+  }, 5000);
+};
+document.getElementById('crandom').onclick = () => {
+  if (used.crandom) return;
+  used.crandom = true;
+  disableButton('crandom');
+  
+  const num = Math.floor(Math.random() * 3) + 1;
+  const p = preguntas[idx];
+  let wrong = p.opts.filter(o => o !== p.ans);
+  wrong = shuffle(wrong).slice(0, num);
+  
+  // Crear contenedor del dado
+  const diceContainer = document.createElement('div');
+  diceContainer.className = 'dice-container';
+  
+  // Crear el dado
+  const dice = document.createElement('div');
+  dice.className = 'dice';
+  
+  // Añadir el dado al contenedor
+  diceContainer.appendChild(dice);
+  document.body.appendChild(diceContainer);
+  
+  // Variable para controlar el número actual mostrado
+  let currentNumber = 0;
+  let interval = setInterval(() => {
+    // Generar número aleatorio entre 1 y 3 para mostrar durante la animación
+    currentNumber = Math.floor(Math.random() * 3) + 1;
+    updateDiceDisplay(dice, currentNumber);
+  }, 100);
+  
+  // Después de 1 segundo, detener la animación y mostrar el número real
+  setTimeout(() => {
+    clearInterval(interval);
+    updateDiceDisplay(dice, num);
+    
+    // Después de 1 segundo más, eliminar el dado y aplicar el efecto
+    setTimeout(() => {
+      document.body.removeChild(diceContainer);
+      
+      // Aplicar el efecto a los botones de respuesta
+      const quizButtons = document.querySelectorAll('#quiz button');
+      quizButtons.forEach(b => {
+        if (wrong.includes(b.textContent)) {
+          b.classList.add('disabled');
+          b.style.opacity = '0.3';
+          b.style.pointerEvents = 'none';
+        }
+      });
+      
+      // Mostrar mensaje de cuántas opciones se eliminaron
+      alert(`🎲 ¡El dado ha eliminado ${num} opción${num > 1 ? 'es' : ''}!`);
+    }, 1000);
+  }, 1000);
+};
+
+// Función para actualizar la visualización del dado
+function updateDiceDisplay(diceElement, number) {
+  // Limpiar el contenido actual del dado
+  diceElement.innerHTML = '';
+  
+  // Crear los puntos según el número
+  if (number === 1) {
+    const dot = document.createElement('div');
+    dot.className = 'dice-dot';
+    dot.style.top = '40px';
+    dot.style.left = '40px';
+    diceElement.appendChild(dot);
+  } else if (number === 2) {
+    const dot1 = document.createElement('div');
+    dot1.className = 'dice-dot';
+    dot1.style.top = '25px';
+    dot1.style.left = '25px';
+    diceElement.appendChild(dot1);
+    
+    const dot2 = document.createElement('div');
+    dot2.className = 'dice-dot';
+    dot2.style.top = '55px';
+    dot2.style.left = '55px';
+    diceElement.appendChild(dot2);
+  } else if (number === 3) {
+    const dot1 = document.createElement('div');
+    dot1.className = 'dice-dot';
+    dot1.style.top = '25px';
+    dot1.style.left = '25px';
+    diceElement.appendChild(dot1);
+    
+    const dot2 = document.createElement('div');
+    dot2.className = 'dice-dot';
+    dot2.style.top = '40px';
+    dot2.style.left = '40px';
+    diceElement.appendChild(dot2);
+    
+    const dot3 = document.createElement('div');
+    dot3.className = 'dice-dot';
+    dot3.style.top = '55px';
+    dot3.style.left = '55px';
+    diceElement.appendChild(dot3);
+  }
+}
+
+function showHint(hintText) {
+  const hintContainer = document.getElementById('hintContainer');
+  const hintTextElement = document.getElementById('hintText');
+  
+  hintTextElement.textContent = hintText;
+  hintContainer.style.display = 'block';
+  
+  // Animar la aparición
+  setTimeout(() => {
+    hintContainer.classList.add('visible');
+  }, 100);
+}
+</script>
+</body>
+</html>
